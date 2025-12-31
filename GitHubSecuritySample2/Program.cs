@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 
 class Program
 {
-    private static string _apiKey = "sk_live_abc123secret";
+    private static string _apiKey = "ghp_0123456789abcdefghijABCDEFGHIJ012345\r\n";
 
     static void Main(string[] args)
     {
