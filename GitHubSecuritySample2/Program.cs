@@ -5,6 +5,7 @@ using System.Text;
 
 class Program
 {
+    private static string password = "abc123";
     private static string _apiKey = "sk_live_abc123secret";
 
     static void Main(string[] args)
