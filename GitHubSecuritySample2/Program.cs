@@ -11,18 +11,15 @@ class Program
 
     static void Main(string[] args)
     {
-        Console.Write("Enter username: ");
-        string username = Console.ReadLine();
-
-        SearchUser(username);
+        SearchUser(username, password);
         HashData("test");
     }
 
-    static void SearchUser(string username)
+    static void SearchUser(string username, string pw)
     {
         // BAD: SQL injection vulnerability
         string connectionString = "Server=localhost;Database=test;";
-        string query = "SELECT * FROM Users WHERE Username = '" + username + "'";
+        string query = "SELECT * FROM Users WHERE Username = '" + username + "' and Password = '" + pw + "'";
 
         using var connection = new SqlConnection(connectionString);
         using var command = new SqlCommand(query, connection);
