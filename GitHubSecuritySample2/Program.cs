@@ -1,6 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 class Program
 {
@@ -16,6 +18,17 @@ class Program
 
         SearchUser(username, password);
         HashData("test");
+
+        var app = WebApplication.Create(args);
+
+        app.MapGet("/download", (string filename) =>
+        {
+            // BAD: Path traversal - user controls file path
+            var path = Path.Combine("/var/www/files", filename);
+            return Results.File(System.IO.File.ReadAllBytes(path));
+        });
+
+        app.Run();
     }
 
     static void SearchUser(string username, string pw)
