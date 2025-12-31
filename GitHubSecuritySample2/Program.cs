@@ -24,8 +24,26 @@ class Program
         app.MapGet("/download", (string filename) =>
         {
             // BAD: Path traversal - user controls file path
-            var path = Path.Combine("/var/www/files", filename);
-            return Results.File(System.IO.File.ReadAllBytes(path));
+            //var path = Path.Combine("/var/www/files", filename);
+            //return Results.File(System.IO.File.ReadAllBytes(path));
+
+            var baseDirectory = Path.GetFullPath("/var/www/files");
+            var combinedPath = Path.Combine(baseDirectory, filename ?? string.Empty);
+            var fullPath = Path.GetFullPath(combinedPath);
+
+            // Ensure the resulting path is within the base directory
+            if (!fullPath.StartsWith(baseDirectory + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                && !string.Equals(fullPath, baseDirectory, StringComparison.Ordinal))
+            {
+                return Results.BadRequest("Invalid file path");
+            }
+
+            if (!System.IO.File.Exists(fullPath))
+            {
+                return Results.NotFound();
+            }
+
+            return Results.File(System.IO.File.ReadAllBytes(fullPath));
         });
 
         app.Run();
