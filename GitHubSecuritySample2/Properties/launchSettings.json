@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "GitHubSecuritySample2": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:58762;http://localhost:58763"
+    }
+  }
+}

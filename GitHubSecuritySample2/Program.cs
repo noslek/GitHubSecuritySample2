@@ -1,36 +1,65 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Security.Cryptography;
 using System.Text;
-
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 
 class Program
 {
-    private static string password = "abc123";
-    private static string _apiKey = "sk_live_abc123secret";
+    private static string _apiKey = "ghp_0123456789abcdefghijABCDEFGHIJ012345\r\n";
 
     static void Main(string[] args)
     {
         Console.Write("Enter username: ");
-        string username = Console.ReadLine();
+        string username = Console.ReadLine();  // User-controlled input
 
-        SearchUser(username);
+        Console.Write("Enter password: ");
+        string password = Console.ReadLine();  // User-controlled input
+
+        SearchUser(username, password);
         HashData("test");
+
+        var app = WebApplication.Create(args);
+
+        app.MapGet("/download", (string filename) =>
+        {
+            // BAD: Path traversal - user controls file path
+            //var path = Path.Combine("/var/www/files", filename);
+            //return Results.File(System.IO.File.ReadAllBytes(path));
+
+            var baseDirectory = Path.GetFullPath("/var/www/files");
+            var combinedPath = Path.Combine(baseDirectory, filename ?? string.Empty);
+            var fullPath = Path.GetFullPath(combinedPath);
+
+            // Ensure the resulting path is within the base directory
+            if (!fullPath.StartsWith(baseDirectory + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                && !string.Equals(fullPath, baseDirectory, StringComparison.Ordinal))
+            {
+                return Results.BadRequest("Invalid file path");
+            }
+
+            if (!System.IO.File.Exists(fullPath))
+            {
+                return Results.NotFound();
+            }
+
+            return Results.File(System.IO.File.ReadAllBytes(fullPath));
+        });
+
+        app.Run();
     }
 
-    static void SearchUser(string username)
+    static void SearchUser(string username, string pw)
     {
-        // BAD: SQL injection vulnerability
         string connectionString = "Server=localhost;Database=test;";
-        string query = "SELECT * FROM Users WHERE Username = '" + username + "'";
+        string query = "SELECT * FROM Users WHERE Username = '" + username + "' and Password = '" + pw + "'";
 
         using var connection = new SqlConnection(connectionString);
         using var command = new SqlCommand(query, connection);
-        // This would execute the unsafe query
     }
 
     static byte[] HashData(string input)
     {
-        // BAD: Weak cryptographic algorithm
         using var md5 = MD5.Create();
         return md5.ComputeHash(Encoding.UTF8.GetBytes(input));
     }
